@@ -19,6 +19,12 @@ include all feedback you received from others on your visualization from the fir
 
 list any sources you consulted to create your visualization
 
+Example of horizontal bar chart:
+http://bl.ocks.org/juan-cb/faf62e91e3c70a99a306
+
+Example of vertical bar chart:
+http://bl.ocks.org/juan-cb/ac731adaeadd3e855d26
+
 ## Sub-heading
  
 Paragraphs are separated
