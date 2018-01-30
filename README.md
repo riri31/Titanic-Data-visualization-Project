@@ -25,6 +25,9 @@ http://bl.ocks.org/juan-cb/faf62e91e3c70a99a306
 Example of vertical bar chart:
 http://bl.ocks.org/juan-cb/ac731adaeadd3e855d26
 
+Example of pie chart
+https://bl.ocks.org/mbostock/1346395
+
 ## Sub-heading
  
 Paragraphs are separated
