@@ -39,7 +39,7 @@
     }
 
     text {
-        font: 10px sans-serif;
+        font: 16px sans-serif;
         color: white;
     }
     text.value {
@@ -64,18 +64,48 @@
     <script type="text/javascript">  
 	
 /////////////////////////////////////////////////////// bar chart 	///////////////////////////////////////////////////////
+	
+	function data_handling(data)
+	{
+	
+	console.log("data handling");
+
+	return data;
+
+
+	}
+
+
 
 	function draw_bar (data)
 	{
+	
+	
+	data=data_handling(data)
+
+/* Survival rate grouped by Class */ 
+	var SurvivalByClass = d3.nest()
+	.key(function(d) { return d.Pclass; })
+	.rollup(function(v) { return {
+    value: 100*d3.sum(v, function(d) { return d.Survived; })/v.length,
+	}; })
+	.entries(data);
+	
+	data=[];
 	console.log(data);
-	    data = [
-        {label:"Category 1", value:19},
-        {label:"Category 2", value:5},
-        {label:"Category 3", value:13},
-        {label:"Category 4", value:17},
-        {label:"Category 5", value:19},
-        {label:"Category 6", value:27}
-    ];
+
+	SurvivalByClass.sort(function (a, b) {
+  return a.key - b.value;
+})
+
+	
+/* Data wrangling */
+	SurvivalByClass.forEach(function(element) {
+  data.push({key:"Class "+element.key, value:Math.round(element.values.value)})
+});
+	
+
+	console.log(data);
 
 
     var div = d3.select("body").append("div").attr("class", "toolTip");
@@ -94,8 +124,7 @@
 
     svg = d3.select('body')
             .append("svg")
-//			.attr("x",10)
-//			.attr("y",10)
+			.attr('id','bar_chart')
             .attr("width", width)
             .attr("height", height)
 			;
@@ -118,7 +147,7 @@
             .attr("y", barHeight / 2)
             .attr("dy", ".35em") //vertical align middle
             .text(function(d){
-                return d.label;
+                return d.key;
             }).each(function() {
         labelWidth = Math.ceil(Math.max(labelWidth, this.getBBox().width));
     });
@@ -158,7 +187,7 @@
                 div.style("left", d3.event.pageX+10+"px");
                 div.style("top", d3.event.pageY-25+"px");
                 div.style("display", "inline-block");
-                div.html((d.label)+"<br>"+(d.value)+"%");
+                div.html((d.key)+"<br>"+(d.value)+"%");
             });
     bar
             .on("mouseout", function(d){
@@ -173,7 +202,8 @@
 	//Create Title 
     svg.append("text")
     .attr("x", width / 2 )
-    .attr("y", title_position)
+    //.attr("y", title_position)
+    .attr("y", height/12)
 	.attr("class", "title")
     .style("text-anchor", "middle")
     .text("Survival rate per passengers class");
@@ -184,25 +214,66 @@
 	
 function draw_pie (data)
 	{
-var width = 550;          //width
+	
+	var color_survival = "rgb(51,153,255)"
+	var color_not_survival = "rgb(153,204,255)"
+
+	data=data_handling(data)
+
+/* Survival rate grouped by Sex */ 
+	var SurvivalBySex = d3.nest()
+	.key(function(d) { return d.Sex; })
+	.rollup(function(v) { return {
+    value: 100*d3.sum(v, function(d) { return d.Survived; })/v.length,
+	}; })
+	.entries(data);
+	
+	data=[];
+	console.log("survival rate:"+data);
+
+	SurvivalBySex.sort(function (a, b) {
+  return a.key - b.value;
+})
+
+
+// Computation survival rate for male
+data_male=[];
+data_male[0]={"count":SurvivalBySex[0].values.value, "color":color_survival};
+data_male[1]={"count":100-SurvivalBySex[0].values.value, "color":color_not_survival};
+
+data_female=[];
+data_female[0]={"count":SurvivalBySex[1].values.value, "color":color_survival};
+data_female[1]={"count":100-SurvivalBySex[1].values.value, "color":color_not_survival};
+
+data=data_male;
+
+	console.log("data"+data);
+	
+var total=0;
+
+for(var a=0;a<data.length;a++){
+total=total+parseInt(data[a].count); // simple logic to calculate total of data count value
+console.log(total)};
+
+/// Scale charts
+	
+var width = 600;          //width
 var title_position = 16;
-var height = 350;        //height
-var radius = 300/ 2;   //radius of the pie-chart
+var height = 400;        //height
+var radius = 60;   //radius of the pie-chart
 var color = d3.scale.category20b();    //builtin range of colors
 var svg = d3.select('body')        //create the SVG element inside the <body>
 	.append('svg')
+	.attr('id','pie_chart')
 	.attr('width', width) //set the width and height of our visualization
 	.attr('height', height) // attributes of the <svg> tag
 	.append('g')              //create a group to hold our pie chart
 	.attr('transform', 'translate(' + (width / 2) +
-	',' + (height / 2) + ')');//move the center of the pie chart from 0, 0 to specified value
+	',' + (2/6*height ) + ')');//move the center of the pie chart from 0, 0 to specified value
 
-var total=0;
-d3.json("sample_data.json", function(error, data) {
-for(var a=0;a<data.length;a++){
-total=total+parseInt(data[a].count); // simple logic to calculate total of data count value
-console.log(total);
-}
+
+
+console.log("data:"+data);
 var pie_data=[];
 for( var a=0;a<data.length;a++){ // simple logic to calculate percentage data for the pie
 pie_data[a]=(data[a].count/total)*100;
@@ -212,6 +283,9 @@ var arc = d3.svg.arc().outerRadius(radius);
 var pie = d3.layout.pie()
 .value(function(d,i) { return pie_data[i]; })
 .sort(null);
+console.log("pie_data:"+pie_data);
+
+
 //Given a list of values, it will create an arc data for us
 //we must explicitly specify it to access the value of each element in our data array
 var path = svg.selectAll('path')
@@ -224,23 +298,138 @@ var path = svg.selectAll('path')
 //set the color for each slice to be chosen, from the color defined in sample_data.json
 //this creates the actual SVG path using the associated data (pie) with the arc drawing function
 
-//Create Title 
-    svg.append("text")
-    .attr("x", width / 2 )
-    .attr("y", -50)
+/////////////////////////////////////
+data=data_female;
+
+svg=d3.select('#pie_chart')
+	.append('g')
+	.attr('transform', 'translate(' + (width / 2) +
+	',' + (4/6*height) + ')');//move the center of the pie chart from 0, 0 to specified value
+
+
+var pie_data=[];
+for( var a=0;a<data.length;a++){ // simple logic to calculate percentage data for the pie
+pie_data[a]=(data[a].count/total)*100;
+}
+var arc = d3.svg.arc().outerRadius(radius);
+// creating arc element.
+var pie = d3.layout.pie()
+.value(function(d,i) { return pie_data[i]; })
+.sort(null);
+console.log("pie_data:"+pie_data);
+	
+	
+
+var arc = d3.svg.arc().outerRadius(radius);
+// creating arc element.
+var pie = d3.layout.pie()
+.value(function(d,i) { return pie_data[i]; })
+.sort(null);
+//Given a list of values, it will create an arc data for us
+//we must explicitly specify it to access the value of each element in our data array
+
+
+var path = svg.selectAll('path')
+	.data(pie(data))
+	.enter()
+	.append('path')
+	.attr('d', arc)
+	.attr('fill', function(d, i) {
+	return data[i].color;});
+	
+/////////////////////////////////////
+
+
+// Figure for Male
+	d3.select('#pie_chart')
+	.append("text")
+    .attr("x", width/2 )
+    .attr("y", height/3)
 	.attr("class", "title")
     .style("text-anchor", "middle")
-    .text("Survival rate per passengers class");
+	.style("fill", "white")
+    .text(Math.round(data_male[0].count)+" %");
 
-	})
+// Figure for Female
+	d3.select('#pie_chart')
+	.append("text")
+    .attr("x", width/2 )
+    .attr("y", 2*height/3)
+	.attr("class", "title")
+    .style("text-anchor", "middle")
+	.style("fill", "white")
+    .text(Math.round(data_female[0].count)+" %");
+	
+// Legend for Male
+	d3.select('#pie_chart')
+	.append("text")
+    .attr("x", width/4 )
+    .attr("y", height/3)
+	.attr("class", "title")
+    .style("text-anchor", "middle")
+    .text("Male");
+
+// Legend for frmale
+	d3.select('#pie_chart')
+	.append("text")
+    .attr("x", width/4 )
+    .attr("y", 2*height/3)
+	.attr("class", "title")
+    .style("text-anchor", "middle")
+    .text("Female");
+
+
+//Create Title 
+    
+	d3.select('#pie_chart')
+	.append("text")
+    .attr("x", width/2 )
+    .attr("y", height/12)
+	.attr("class", "title")
+    .style("text-anchor", "middle")
+    .text("Survival rate per sex");
+
+	
 }
 /////////////////////////////////////////////////////// Vertical bar chart 	///////////////////////////////////////////////////////
 function draw_vertical_bar (data)
 	{
-	var margin = {top: (parseInt(d3.select('body').style('width'), 10)/10), right: (parseInt(d3.select('body').style('width'), 10)/20), bottom: (parseInt(d3.select('body').style('width'), 10)/5), left: (parseInt(d3.select('body').style('width'), 10)/20)},
+	/*var margin = {top: (parseInt(d3.select('body').style('width'), 10)/10), right: (parseInt(d3.select('body').style('width'), 10)/20), bottom: (parseInt(d3.select('body').style('width'), 10)/5), left: (parseInt(d3.select('body').style('width'), 10)/20)},
     width = (parseInt(d3.select('body').style('width'), 10) - margin.left - margin.right)/2,
-    height = (parseInt(d3.select('body').style('height'), 10) - margin.top - margin.bottom);
+    height = (parseInt(d3.select('body').style('height'), 10) - margin.top - margin.bottom);*/
 
+	var margin = {top: (parseInt(d3.select('body').style('width'), 10)/20), right: (parseInt(d3.select('body').style('width'), 10)/13), bottom: (parseInt(d3.select('body').style('width'), 10)/20), left: (parseInt(d3.select('body').style('width'), 10)/13)},
+    width = (parseInt(d3.select('body').style('width'), 10))/2.5,
+    height = (parseInt(d3.select('body').style('height'), 10)/2.5 );
+
+//////////////////////////////////
+
+
+	data=data_handling(data)
+
+/* Survival rate grouped by Sex and by Class */ 
+	var SurvivalBySexPClass = d3.nest()
+	.key(function(d) { return d.Sex; })
+	.key(function(d) { return d.Pclass; })
+	.rollup(function(v) { return {
+    value: 100*d3.sum(v, function(d) { return d.Survived; })/v.length,
+	}; })
+	.entries(data);
+	
+
+	SurvivalBySexPClass.sort(function (a, b) {
+	return a.key - b.key;
+	})
+	debugger;
+	
+
+dataset = [
+    {label:"Male", "Class 1":SurvivalBySexPClass[0].values[0].values.value, "Class 2":SurvivalBySexPClass[0].values[1].values.value, "Class 3": SurvivalBySexPClass[0].values[2].values.value},
+    {label:"Female", "Class 1":SurvivalBySexPClass[1].values[0].values.value, "Class 2":SurvivalBySexPClass[1].values[1].values.value, "Class 3": SurvivalBySexPClass[1].values[2].values.value}
+];	
+
+///////////////////////////////////
+	
 var x0 = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
 
@@ -267,17 +456,16 @@ var yAxis = d3.svg.axis()
 var divTooltip = d3.select("body").append("div").attr("class", "toolTip");
 
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+var svg = d3.select("body")
+	.append("svg")
+	.attr('id','vertical_bar_chart')
+    .attr("width", width )
+    .attr("height", height )
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top+ ")");
 
 
-dataset = [
-    {label:"Men", "Not Satisfied":20, "Not Much Satisfied":10, "Satisfied": 50, "Very Satisfied":20},
-    {label:"Women", "Not Satisfied":15, "Not Much Satisfied":30, "Satisfied":40, "Very Satisfied":15}
-];
+
 
 
 var options = d3.keys(dataset[0]).filter(function(key) { return key !== "label"; });
@@ -303,7 +491,7 @@ svg.append("g")
     .attr("y", 6)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("Satisfaction %");
+    .text("Survival rate %");
 
 var bar = svg.selectAll(".bar")
     .data(dataset)
@@ -358,14 +546,18 @@ legend.append("text")
     .style("text-anchor", "end")
     .text(function(d) { return d; });
 	
-	//Create Title 
-    svg.append("text")
-    .attr("x", width / 2 )
-    .attr("y", title_position)
+
+	
+
+//Create Title 
+    
+	d3.select('#vertical_bar_chart')
+	.append("text")
+    .attr("x", width/1.6 )
+    .attr("y", height/12)
 	.attr("class", "title")
     .style("text-anchor", "middle")
     .text("Survival rate per passengers class");
-	
 
 	}
 
@@ -391,7 +583,9 @@ var arc = d3.svg.arc()
     .innerRadius(radius - 100)
     .outerRadius(radius - 20);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("body")
+	.append("svg")
+	.attr('id','interactive_chart')
     .attr("width", width)
     .attr("height", height)
   .append("g")
@@ -419,13 +613,16 @@ d3.tsv("data.tsv", type, function(error, data) {
     path = path.data(pie); // compute the new angles
     path.attr("d", arc); // redraw the arcs
   }
-  	//Create Title 
+
+  
+  //Create Title 
     svg.append("text")
     .attr("x", 0 )
     .attr("y", 0)
 	.attr("class", "title")
     .style("text-anchor", "middle")
     .text("Survival rate per passengers class");
+  
 });
 
 function type(d) {
@@ -433,6 +630,8 @@ function type(d) {
   d.oranges = +d.oranges;
   return d;
 }
+  
+
 }
     </script>
   </head>
