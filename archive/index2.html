@@ -62,26 +62,25 @@
     }
     </style>
     <script type="text/javascript">  
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	
 /////////////////////////////////////////////////////// bar chart 	///////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-// Example of horizontal bar chart:http://bl.ocks.org/juan-cb/faf62e91e3c70a99a306
-
+	
 	function data_handling(data)
 	{
+	
 	console.log("data handling");
+
 	return data;
+
+
 	}
 
 
-/////////////////////// Draw bar /////////////////
+
 	function draw_bar (data)
 	{
 	
-/* import of data */	
+	
 	data=data_handling(data)
 
 /* Survival rate grouped by Class */ 
@@ -97,20 +96,20 @@
 
 	SurvivalByClass.sort(function (a, b) {
   return a.key - b.value;
-	})
+})
 
 	
-	/* Data wrangling */
-	
-	/* Rounded value for survival rate */
+/* Data wrangling */
 	SurvivalByClass.forEach(function(element) {
-		data.push({key:"Class "+element.key, value:Math.round(element.values.value)})
-		});
+  data.push({key:"Class "+element.key, value:Math.round(element.values.value)})
+});
 	
-	/* Add tool tip */
+
+	console.log(data);
+
+
     var div = d3.select("body").append("div").attr("class", "toolTip");
 
-	/* Definition of charts dimmensions */
     var axisMargin = 20,
             margin = 40,
             valueMargin = 4,
@@ -123,7 +122,6 @@
 
     max = d3.max(data, function(d) { return d.value; });
 
-	/* Append SVG in the chart */
     svg = d3.select('body')
             .append("svg")
 			.attr('id','bar_chart')
@@ -132,20 +130,18 @@
 			;
 
 
-	/* Group the  charts elements*/
+
     bar = svg.selectAll("g")
             .data(data)
             .enter()
             .append("g");
 
-	/* Translate the charts elements*/
     bar.attr("class", "bar")
             .attr("cx",0)
             .attr("transform", function(d, i) {
                 return "translate(" + margin + "," + (i * (barHeight + barPadding) + barPadding) + ")";
             });
 
-	/* Add the text to the bars*/
     bar.append("text")
             .attr("class", "label")
             .attr("y", barHeight / 2)
@@ -156,18 +152,15 @@
         labelWidth = Math.ceil(Math.max(labelWidth, this.getBBox().width));
     });
 
-	/* Create scale function*/
     scale = d3.scale.linear()
             .domain([0, max])
             .range([0, width - margin*2 - labelWidth]);
-			
-	/* Create x axis*/
+
     xAxis = d3.svg.axis()
             .scale(scale)
             .tickSize(-height + 2*margin + axisMargin)
             .orient("bottom");
-	
-	/* Create the bars*/
+
     bar.append("rect")
             .attr("transform", "translate("+labelWidth+", 0)")
             .attr("height", barHeight)
@@ -175,7 +168,6 @@
                 return scale(d.value);
             });
 
-	/* Add the value to the bars*/
     bar.append("text")
             .attr("class", "value")
             .attr("y", barHeight / 2)
@@ -207,28 +199,22 @@
             .attr("transform", "translate(" + (margin + labelWidth) + ","+ (height - axisMargin - margin)+")")
             .call(xAxis);
 	
-	//Create Title for the chart
+	//Create Title 
     svg.append("text")
     .attr("x", width / 2 )
+    //.attr("y", title_position)
     .attr("y", height/12)
 	.attr("class", "title")
     .style("text-anchor", "middle")
     .text("Survival rate per passengers class");
 	}
 
-	
-	
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////// pie chart 	///////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
-
-// Example of pie chart: https://bl.ocks.org/mbostock/1346395
-
-/////////////////////// Draw pie /////////////////
+	
+	
 function draw_pie (data)
 	{
 	
-/* Define the two colors of pie charts */ 
 	var color_survival = "rgb(51,153,255)"
 	var color_not_survival = "rgb(153,204,255)"
 
@@ -250,25 +236,23 @@ function draw_pie (data)
 })
 
 
-/* Computation survival rate for male */
+// Computation survival rate for male
 data_male=[];
 data_male[0]={"count":SurvivalBySex[0].values.value, "color":color_survival};
 data_male[1]={"count":100-SurvivalBySex[0].values.value, "color":color_not_survival};
 
-/* Computation survival rate for female */
 data_female=[];
 data_female[0]={"count":SurvivalBySex[1].values.value, "color":color_survival};
 data_female[1]={"count":100-SurvivalBySex[1].values.value, "color":color_not_survival};
 
-////////////////// Create Male pie chart //////////////////
 data=data_male;
 
+	console.log("data"+data);
+	
 var total=0;
 
-
-/* simple logic to calculate total of data count value*/
 for(var a=0;a<data.length;a++){
-total=total+parseInt(data[a].count); 
+total=total+parseInt(data[a].count); // simple logic to calculate total of data count value
 console.log(total)};
 
 /// Scale charts
@@ -287,9 +271,11 @@ var svg = d3.select('body')        //create the SVG element inside the <body>
 	.attr('transform', 'translate(' + (width / 2) +
 	',' + (2/6*height ) + ')');//move the center of the pie chart from 0, 0 to specified value
 
-/* simple logic to calculate total of data count value*/
+
+
+console.log("data:"+data);
 var pie_data=[];
-for( var a=0;a<data.length;a++){ 
+for( var a=0;a<data.length;a++){ // simple logic to calculate percentage data for the pie
 pie_data[a]=(data[a].count/total)*100;
 }
 var arc = d3.svg.arc().outerRadius(radius);
@@ -297,6 +283,8 @@ var arc = d3.svg.arc().outerRadius(radius);
 var pie = d3.layout.pie()
 .value(function(d,i) { return pie_data[i]; })
 .sort(null);
+console.log("pie_data:"+pie_data);
+
 
 //Given a list of values, it will create an arc data for us
 //we must explicitly specify it to access the value of each element in our data array
@@ -310,7 +298,7 @@ var path = svg.selectAll('path')
 //set the color for each slice to be chosen, from the color defined in sample_data.json
 //this creates the actual SVG path using the associated data (pie) with the arc drawing function
 
-////////////////// Create Female pie chart //////////////////
+/////////////////////////////////////
 data=data_female;
 
 svg=d3.select('#pie_chart')
@@ -328,7 +316,10 @@ var arc = d3.svg.arc().outerRadius(radius);
 var pie = d3.layout.pie()
 .value(function(d,i) { return pie_data[i]; })
 .sort(null);
-		
+console.log("pie_data:"+pie_data);
+	
+	
+
 var arc = d3.svg.arc().outerRadius(radius);
 // creating arc element.
 var pie = d3.layout.pie()
@@ -346,10 +337,10 @@ var path = svg.selectAll('path')
 	.attr('fill', function(d, i) {
 	return data[i].color;});
 	
-//////////////////////////// End of pie chart creation ///////////////////////
+/////////////////////////////////////
 
 
-// Figure % for Male
+// Figure for Male
 	d3.select('#pie_chart')
 	.append("text")
     .attr("x", width/2 )
@@ -359,7 +350,7 @@ var path = svg.selectAll('path')
 	.style("fill", "white")
     .text(Math.round(data_male[0].count)+" %");
 
-// Figure % for Female
+// Figure for Female
 	d3.select('#pie_chart')
 	.append("text")
     .attr("x", width/2 )
@@ -388,7 +379,7 @@ var path = svg.selectAll('path')
     .text("Female");
 
 
-//Create Title for the SVG
+//Create Title 
     
 	d3.select('#pie_chart')
 	.append("text")
@@ -400,25 +391,20 @@ var path = svg.selectAll('path')
 
 	
 }
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////// Vertical bar chart 	///////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Example of pie chart: http://bl.ocks.org/juan-cb/ac731adaeadd3e855d26
-
-
-/////////////////////// Draw vertical bar /////////////////
+/////////////////////////////////////////////////////// Vertical bar chart 	///////////////////////////////////////////////////////
 function draw_vertical_bar (data)
 	{
+	/*var margin = {top: (parseInt(d3.select('body').style('width'), 10)/10), right: (parseInt(d3.select('body').style('width'), 10)/20), bottom: (parseInt(d3.select('body').style('width'), 10)/5), left: (parseInt(d3.select('body').style('width'), 10)/20)},
+    width = (parseInt(d3.select('body').style('width'), 10) - margin.left - margin.right)/2,
+    height = (parseInt(d3.select('body').style('height'), 10) - margin.top - margin.bottom);*/
 
-/* Definition of the chart dimensions */
 	var margin = {top: (parseInt(d3.select('body').style('width'), 10)/20), right: (parseInt(d3.select('body').style('width'), 10)/13), bottom: (parseInt(d3.select('body').style('width'), 10)/20), left: (parseInt(d3.select('body').style('width'), 10)/13)},
     width = (parseInt(d3.select('body').style('width'), 10))/2.5,
     height = (parseInt(d3.select('body').style('height'), 10)/2.5 );
 
-/* Importation of the data */
+//////////////////////////////////
+
+
 	data=data_handling(data)
 
 /* Survival rate grouped by Sex and by Class */ 
@@ -429,22 +415,34 @@ function draw_vertical_bar (data)
     value: 100*d3.sum(v, function(d) { return d.Survived; })/v.length,
 	}; })
 	.entries(data);
-		SurvivalBySexPClass.sort(function (a, b) {
+	
+
+	SurvivalBySexPClass.sort(function (a, b) {
 	return a.key - b.key;
 	})
+	debugger;
 	
-/* Definition of the dataset for the chart*/
+
 dataset = [
     {label:"Male", "Class 1":SurvivalBySexPClass[0].values[0].values.value, "Class 2":SurvivalBySexPClass[0].values[1].values.value, "Class 3": SurvivalBySexPClass[0].values[2].values.value},
     {label:"Female", "Class 1":SurvivalBySexPClass[1].values[0].values.value, "Class 2":SurvivalBySexPClass[1].values[1].values.value, "Class 3": SurvivalBySexPClass[1].values[2].values.value}
 ];	
 
-/* Scale definition */
+///////////////////////////////////
+	
 var x0 = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
+
 var x1 = d3.scale.ordinal();
+
 var y = d3.scale.linear()
     .range([height, 0]);
+
+var title_position = 16;
+	
+var colorRange = d3.scale.category20();
+var color = d3.scale.ordinal()
+    .range(colorRange.range());
 
 var xAxis = d3.svg.axis()
     .scale(x0)
@@ -455,18 +453,9 @@ var yAxis = d3.svg.axis()
     .orient("left")
     .tickFormat(d3.format(".2s"));
 
-/* Title position */
-var title_position = 16;
-
-/* Definition of charts color */
-var colorRange = d3.scale.category20();
-var color = d3.scale.ordinal()
-    .range(colorRange.range());
-
-/* Add tool tip */
 var divTooltip = d3.select("body").append("div").attr("class", "toolTip");
 
-/* Creation of the SVG */
+
 var svg = d3.select("body")
 	.append("svg")
 	.attr('id','vertical_bar_chart')
@@ -475,8 +464,11 @@ var svg = d3.select("body")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top+ ")");
 
-var options = d3.keys(dataset[0]).filter(function(key) { return key !== "label"; });
 
+
+
+
+var options = d3.keys(dataset[0]).filter(function(key) { return key !== "label"; });
 
 dataset.forEach(function(d) {
     d.valores = options.map(function(name) { return {name: name, value: +d[name]}; });
@@ -486,13 +478,11 @@ x0.domain(dataset.map(function(d) { return d.label; }));
 x1.domain(options).rangeRoundBands([0, x0.rangeBand()]);
 y.domain([0, d3.max(dataset, function(d) { return d3.max(d.valores, function(d) { return d.value; }); })]);
 
-/* creation of x axis */
 svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
     .call(xAxis);
 
-/* creation of y axis */
 svg.append("g")
     .attr("class", "y axis")
     .call(yAxis)
@@ -503,14 +493,12 @@ svg.append("g")
     .style("text-anchor", "end")
     .text("Survival rate %");
 
-/* creation of bars */
 var bar = svg.selectAll(".bar")
     .data(dataset)
     .enter().append("g")
     .attr("class", "rect")
     .attr("transform", function(d) { return "translate(" + x0(d.label) + ",0)"; });
 
-/* bars sizing and color filling */
 bar.selectAll("rect")
     .data(function(d) { return d.valores; })
     .enter().append("rect")
@@ -521,7 +509,6 @@ bar.selectAll("rect")
     .attr("height", function(d) { return height - y(d.value); })
     .style("fill", function(d) { return color(d.name); });
 
-/* tool tip*/
 bar
     .on("mousemove", function(d){
         divTooltip.style("left", d3.event.pageX+10+"px");
@@ -539,21 +526,19 @@ bar
         divTooltip.style("display", "none");
     });
 
-/* Add legend */
+
 var legend = svg.selectAll(".legend")
     .data(options.slice())
     .enter().append("g")
     .attr("class", "legend")
     .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-/* Add legend rectangle */
 legend.append("rect")
     .attr("x", width - 18)
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", color);
 
-/* Add legend text */
 legend.append("text")
     .attr("x", width - 24)
     .attr("y", 9)
@@ -562,11 +547,13 @@ legend.append("text")
     .text(function(d) { return d; });
 	
 
-/* Create Title */
+	
+
+//Create Title 
     
 	d3.select('#vertical_bar_chart')
 	.append("text")
-    .attr("x", width/2 )
+    .attr("x", width/1.6 )
     .attr("y", height/12)
 	.attr("class", "title")
     .style("text-anchor", "middle")
@@ -574,229 +561,78 @@ legend.append("text")
 
 	}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////// map chart	///////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- 
- // Sample extracted from Udacity training: Visualization module
- 
- /////////////////////// Draw map chart /////////////////
- function draw_map_chart() {
- 
- /* Import world countries map */
- d3.json("data/world_countries.json",draw_map);
- 
- }
- 
-  /* draw map chart */ 
- function draw_map(geo_data) {
+/////////////////////////////////////////////////////// interactive chart  	///////////////////////////////////////////////////////	
+function draw_interactive_chart(data)
+	{
 
-/* definition of chart dimmensions */
-        "use strict";
-        var margin = 0,
-            width = 600 - margin,
-            height = 400 - margin;
-			
-/* creation of the svg */
+var title_position = 16;
+          
+
+var margin = 40,
+	width = (parseInt(d3.select('body').style('width'), 10) -margin/2)/2,
+    height = (parseInt(d3.select('body').style('height'), 10) - margin/2)/2,
+    radius = Math.min(width, height) / 2;
+
+var color = d3.scale.category20();
+
+var pie = d3.layout.pie()
+    .value(function(d) { return d.apples; })
+    .sort(null);
+
+var arc = d3.svg.arc()
+    .innerRadius(radius - 100)
+    .outerRadius(radius - 20);
+
 var svg = d3.select("body")
-            .append("svg")
-			.attr('id','map_chart')
-            .attr("width", width + margin)
-            .attr("height", height + margin)
-            .append('g')
-            .attr('class', 'map');
-
-/* creation of projection function */
-var projection = d3.geo.mercator()
-                   .scale(700)
-                   .translate([width / 2, height / 0.45]);
-
-/* creation of world map */
-var path = d3.geo.path().projection(projection);
-
-/* Drawing of world map */
-var map = svg.selectAll('path')
-                     .data(geo_data.features)
-                     .enter()
-                     .append('path')
-                     .attr('d', path)
-                     .style('fill', 'lightBlue')
-                     .style('stroke', 'black')
-                     .style('stroke-width', 0.5);
-		
-
-/* function for drawing circle */
-function plot_points(data) {
-         		
-	/* function that gives projected ports x,y */
-	function latlong_x_y(Port) {
-			var QueenstownXY = projection([-8.29917, 51.85722]);
-			var SouthamptonXY = projection([-1.40428, 50.90395]);
-			var CherbourgXY = projection([-1.61636, 49.63984]);
-					
-			var coord={};
-				switch (Port) {
-			case 'Q':
-				coord = {x:QueenstownXY[0],y: QueenstownXY[1]};
-				break;
-			case 'S':
-				coord = {x:SouthamptonXY[0],y: SouthamptonXY[1]};
-				break;
-			case 'C':
-				coord = {x:CherbourgXY[0],y: CherbourgXY[1]};
-				break;
-			default:
-				coord = {x:50, y:0};
-								}
-				
-				return coord;
-			}
-			
-	/* function that gives ports full name*/		
-	function portname(Port) {
-			
-			console.log("Port:"+Port);
+	.append("svg")
+	.attr('id','interactive_chart')
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 	
-			var name="";
-				switch (Port) {
-			case 'C':
-				name = "1 - Cherbourg";
-				break;
-			case 'S':
-				name = "2 - Southampton";
-				break;
-			case 'Q':
-				name = "3 - Queenstown";
-				break;
-			default:
-				name = "Other";
-								}
-				
-				return name;
-			}
-	
-			
-/* Passengers grouped by Port */ 
-	var SurvivalByPort = d3.nest()
-		.key(function(d) { return d.Port; })
-		.rollup(function(v) { console.log(v);return {
-			value: v.length
-			}; })
-		.entries(data);
 
-	SurvivalByPort.sort(function (a, b) {
-  return a.key - b.value;
-	})
+d3.tsv("data.tsv", type, function(error, data) {
+  var path = svg.datum(data).selectAll("path")
+      .data(pie)
+    .enter().append("path")
+      .attr("fill", function(d, i) { return color(i); })
+      .attr("d", arc);
 
+  d3.selectAll("input")
+      .on("change", change);
 
-/* create a new array containing Port full name + projected xy + passengers numbers */
-var SurvivalByPortXY=[];
-var passengers_max = 0;
-for (var i=0; i<SurvivalByPort.length;i++) {
+  var timeout = setTimeout(function() {
+    d3.select("input[value=\"oranges\"]").property("checked", true).each(change);
+  }, 2000);
 
-  var entry={Port: SurvivalByPort[i].key,
-			 PortName : portname(SurvivalByPort[i].key),
-			 latlong: latlong_x_y(SurvivalByPort[i].key),
-			 Passengers: SurvivalByPort[i].values.value
-			 };
-  if (entry['Passengers']	> passengers_max) { passengers_max=entry['Passengers'];}
-  SurvivalByPortXY.push(entry);
-}
-
-		
-			
-/* create circle depending on passengers per port */
-var radius = d3.scale.sqrt()
-                           .domain([0, passengers_max])
-                           .range([0, 15]);
-
-            svg.append('g')
-               .attr("class", "bubble")
-               .selectAll("circle")
-			   .data(SurvivalByPortXY)
-               .enter()
-               .append("circle")
-			   .attr('cx', function(d) { return d.latlong.x; })
-			   .attr('cy', function(d) { return d.latlong.y; })
-               .attr('r', function(d) {
-                    //return radius(d.values['attendance']);
-					return radius(d.Passengers);
-               })
-               .attr('fill', 'rgb(247, 148, 32)')
-               .attr('stroke', 'black')
-               .attr('stroke-width', 0.7)
-               .attr('opacity', 0.7);
-			   
-			   
-/* Create Port label on map */
-
-	svg.append('g')
-	 .selectAll("text")
-     .data(SurvivalByPortXY)
-	 .enter()
-	.append("text")
-    .attr('x', function(d) { return d.latlong.x; })
-    .attr('y', function(d) { return d.latlong.y; })
-	.attr("class", "title")
-    .style("text-anchor", "middle")
-	.style("color", "blue")
-	.style("font-size", "10px")
-    .text(function(d) { return d.PortName; });
-
-        }
+  function change() {
+    var value = this.value;
+    clearTimeout(timeout);
+    pie.value(function(d) { return d[value]; }); // change the value function
+    path = path.data(pie); // compute the new angles
+    path.attr("d", arc); // redraw the arcs
+  }
 
   
-/* calling of circle creation */
-var data=d3.csv("data/titanic-data.csv", function(d) {
-		return {
-			Name : d.Name,
-			Sex : d.Sex,
-			Port : d.Embarked
-				};
-			},plot_points);
-				
-		/* Create Title for the SVG */
-
-	d3.select('#map_chart')
-	.append("text")
-    .attr("x", width/1.6 )
-    .attr("y", height/12)
+  //Create Title 
+    svg.append("text")
+    .attr("x", 0 )
+    .attr("y", 0)
 	.attr("class", "title")
     .style("text-anchor", "middle")
-    .text("Port of embarkation");
-		///////////////////////////////
-			  
-		/* Add legend */
-var legend = svg.append("g")
-    .attr("class", "legend")
-    .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+    .text("Survival rate per passengers class");
+  
+});
 
-	
-      legend.append("circle")
-	  .attr('cx', width *7.3/ 10)
-	  .attr('cy', 3.5*height/4)
-      .attr('r', 13)
-      .attr('fill', 'rgb(247, 148, 32)')
-      .attr('stroke', 'black')
-      .attr('stroke-width', 0.7)
-      .attr('opacity', 0.7);
+function type(d) {
+  d.apples = +d.apples;
+  d.oranges = +d.oranges;
+  return d;
+}
+  
 
-/* Add legend text */
-legend.append("text")
-    .attr("x", width *9.5 /10)
-    .attr("y", 3.5*height/4)
-    .attr("dy", ".35em")
-    .style("text-anchor", "end")
-    .text("500 passengers");
-	
-
-
-		
-		////////////////////////////
-      }
-	  
-	  // Legend for Map
-
+}
     </script>
   </head>
 <body>
@@ -806,11 +642,10 @@ legend.append("text")
     Use D3 to load the GeoJSON file
     */
     
-d3.csv("data/titanic-data.csv", draw_bar); // calling of horizontal bar chart creation function
-d3.csv("data/titanic-data.csv", draw_pie);// calling of pie chart chart creation function
-d3.csv("data/titanic-data.csv", draw_vertical_bar);// calling of vertical bar chart creation function
-draw_map_chart();// calling of map chart creation function
-
+d3.csv("data/titanic-data.csv", draw_bar);
+d3.csv("data/titanic-data.csv", draw_pie);
+d3.csv("data/titanic-data.csv", draw_vertical_bar);
+d3.csv("data/titanic-data.csv", draw_interactive_chart);
   </script>
 </body>
 </html>
